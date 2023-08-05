@@ -5,42 +5,61 @@ import {useState} from "react";
 
 interface Data {
     name: string,
-    children: null | Data[]
+    children: Data[]
 }
 
 function App() {
-    const [data] = useState<Data>({
+    const [data, setData] = useState<Data>({
         name: "Hello",
         children: [
-            {name: "World", children: null},
-            {name: "Nice", children: null},
-            {name: "To", children: null},
+            {name: "World", children: []},
+            {name: "Nice", children: []},
+            {name: "To", children: []},
         ]
     });
+    const [reload, setReload] = useState(0);
 
     return (
         <div>
-            <Render data={data}/>
+            <Render data={data} onChange={(data) => {
+                setData(data);
+                setReload(reload + 1);
+            }}/>
         </div>
     )
 }
 
-const Render = ({data}: { data: Data }) => {
-    const [isOpen, setIsOpen] = useState(true)
+const Render = ({data, onChange, index}: { data: Data, onChange, index? }) => {
+    const [isOpen, setIsOpen] = useState(true);
+
+    const changeHere = (newData, index) => {
+        data.children[index] = newData;
+        if (index === undefined) {
+            onChange(data, index);
+        } else {
+            onChange(data);
+        }
+    }
+
     return (
         <div>
             <Stack direction="row" spacing={1} align="center">
-                {data.children && <Button
-                    marginLeft={0} onClick={() => setIsOpen(!isOpen)}>
-                    <FcCollapse style={{transform: `rotate(${isOpen ? 0 : 180}deg)`}}/>
+                {data.children.length > 0 && <Button
+                  marginLeft={0} onClick={() => setIsOpen(!isOpen)}>
+                  <FcCollapse style={{transform: `rotate(${isOpen ? 0 : 180}deg)`}}/>
                 </Button>}
-                <Button marginRight={0}>
+                <Button
+                    onClick={() => {
+                        onChange({...data, name: "Changed"}, index);
+                    }}
+                    marginRight={0}>
                     {data.name}
                 </Button>
                 <Button marginLeft={0}><AiOutlinePlus/></Button>
             </Stack>
             {isOpen && <div style={{paddingLeft: "20px", margin: "5px"}}>
-                {data.children && data.children.map((child) => <Render data={child}/>)}
+                {data.children.length > 0 && data.children.map((child, index) =>
+                    <Render key={index} data={child} index={index} onChange={changeHere}/>)}
             </div>
             }
         </div>
