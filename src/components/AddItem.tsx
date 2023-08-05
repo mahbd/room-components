@@ -1,12 +1,12 @@
 import {Button, Input, Popover, PopoverContent, PopoverTrigger, useBoolean} from "@chakra-ui/react";
+import {AiOutlinePlus} from "react-icons/ai";
 import {useRef} from "react";
 
 interface Props {
-    name: string,
     onChange: (newName: string) => void
 }
 
-function ItemHead({name, onChange}: Props) {
+const AddItem = ({onChange}: Props) => {
     const [isEditing, setIsEditing] = useBoolean();
     const inputRef = useRef(null);
 
@@ -16,21 +16,22 @@ function ItemHead({name, onChange}: Props) {
         onOpen={setIsEditing.on}
         onClose={setIsEditing.off}>
         <PopoverTrigger>
-            <Button>{name}</Button>
+            <Button><AiOutlinePlus/></Button>
         </PopoverTrigger>
         <PopoverContent>
             <Input
                 ref={inputRef}
-                defaultValue={name}
-                   onKeyPress={(e: any) => {
-                       if (e.key === "Enter") {
-                           onChange(e.target.value);
-                           setIsEditing.off();
-                       }
-                   }}
+                placeholder={"Item name"}
+                onKeyPress={(e: any) => {
+                    if (e.key === "Enter") {
+                        onChange(e.target.value);
+                        e.target.value = "";
+                        setIsEditing.off();
+                    }
+                }}
             />
         </PopoverContent>
     </Popover>;
-}
+};
 
-export default ItemHead;
+export default AddItem;

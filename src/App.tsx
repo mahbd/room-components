@@ -6,12 +6,8 @@ import {ItemModel} from "./models";
 
 function App() {
     const [data, setData] = useState<ItemModel>({
-        name: "Hello",
-        children: [
-            {name: "World", children: []},
-            {name: "Nice", children: []},
-            {name: "To", children: []},
-        ]
+        name: "Root",
+        children: []
     });
     const [reload, setReload] = useState(0);
 

@@ -2,8 +2,8 @@ import {useState} from "react";
 import {Button, Stack, useBoolean} from "@chakra-ui/react";
 import {FcCollapse} from "react-icons/fc";
 import ItemHead from "./ItemHead";
-import {AiOutlinePlus} from "react-icons/ai";
 import {ItemModel} from "../models";
+import AddItem from "./AddItem";
 
 const Item = ({data, onChange, index}: { data: ItemModel, onChange, index? }) => {
     const [isOpen, setIsOpen] = useState(true);
@@ -20,7 +20,7 @@ const Item = ({data, onChange, index}: { data: ItemModel, onChange, index? }) =>
     return (
         <div>
             <Stack direction="row" spacing={1} align="center">
-                {data.children.length > 0 && <Button
+                {data.children.length > 0 && <Button width={4} padding={0}
                   onClick={() => setIsOpen(!isOpen)}>
                   <FcCollapse style={{transform: `rotate(${isOpen ? 0 : 180}deg)`}}/>
                 </Button>}
@@ -29,7 +29,10 @@ const Item = ({data, onChange, index}: { data: ItemModel, onChange, index? }) =>
                     onChange({...data, name: newName}, index);
                 }}/>
 
-                <Button><AiOutlinePlus/></Button>
+                <AddItem onChange={(itemName: string) => {
+                    data.children.push({name: itemName, children: []});
+                    onChange(data, index);
+                }} />
             </Stack>
             {isOpen && <div style={{paddingLeft: "20px", margin: "5px"}}>
                 {data.children.length > 0 && data.children.map((child, index) =>
