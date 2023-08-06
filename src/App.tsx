@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import Item from "./components/Item";
 import {ItemModel} from "./models";
 
@@ -9,12 +9,25 @@ function App() {
         name: "Root",
         children: []
     });
+
+    useEffect(() => {
+        const data = localStorage.getItem("data");
+        if (data) {
+            setData(JSON.parse(data));
+        }
+    });
+
+    const saveData = (data: ItemModel) => {
+        localStorage.setItem("data", JSON.stringify(data));
+        setData(data);
+    }
+
     const [reload, setReload] = useState(0);
 
     return (
         <div>
             <Item data={data} onChange={(data) => {
-                setData(data);
+                saveData(data);
                 setReload(reload + 1);
             }}/>
         </div>

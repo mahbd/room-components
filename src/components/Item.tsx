@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {Button, Stack, useBoolean} from "@chakra-ui/react";
+import {Button, Stack} from "@chakra-ui/react";
 import {FcCollapse} from "react-icons/fc";
 import ItemHead from "./ItemHead";
 import {ItemModel} from "../models";
