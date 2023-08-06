@@ -16,7 +16,7 @@ const AddItem = ({onChange}: Props) => {
         onOpen={setIsEditing.on}
         onClose={setIsEditing.off}>
         <PopoverTrigger>
-            <Button><AiOutlinePlus/></Button>
+            <Button padding={0}><AiOutlinePlus/></Button>
         </PopoverTrigger>
         <PopoverContent>
             <Input
