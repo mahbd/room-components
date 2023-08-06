@@ -6,11 +6,19 @@ import {ItemModel} from "../models";
 import AddItem from "./AddItem";
 import {AiFillDelete} from "react-icons/ai";
 
-const Item = ({data, onChange, index}: { data: ItemModel, onChange, index? }) => {
+interface Props {
+    data: ItemModel,
+    onChange: (newData: ItemModel | undefined, index?: number) => void,
+    index?: number
+}
+
+const Item = ({data, onChange, index}: Props) => {
     const [isOpen, setIsOpen] = useState(true);
 
     const changeHere = (newData: ItemModel | undefined, index: number | undefined) => {
-        data.children[index] = newData;
+        if (index !== undefined && newData !== undefined) {
+            data.children[index] = newData;
+        }
         if (newData === undefined) {
             if (index !== undefined) {
                 data.children.splice(index, 1);

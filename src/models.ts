@@ -3,4 +3,4 @@ interface ItemModel {
     children: ItemModel[]
 }
 
-export {ItemModel};
+export type {ItemModel};

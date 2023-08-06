@@ -3,7 +3,6 @@ import Item from "./components/Item";
 import {ItemModel} from "./models";
 
 
-
 function App() {
     const [data, setData] = useState<ItemModel>({
         name: "Root",
@@ -17,7 +16,13 @@ function App() {
         }
     });
 
-    const saveData = (data: ItemModel) => {
+    const saveData = (data: ItemModel | undefined) => {
+        if (data === undefined) {
+            data = {
+                name: "Root",
+                children: []
+            }
+        }
         localStorage.setItem("data", JSON.stringify(data));
         setData(data);
     }
