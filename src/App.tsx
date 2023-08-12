@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import Item from "./components/Item";
 import {ItemModel} from "./models";
+import NavBar from "./components/NavBar";
 
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
 
     return (
         <div>
+            <NavBar/>
             <Item data={data} onChange={(data) => {
                 saveData(data);
                 setReload(reload + 1);
