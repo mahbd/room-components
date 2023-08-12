@@ -1,6 +1,6 @@
 interface ItemModel {
     name: string,
-    children: ItemModel[]
+    children: ItemModel[] | undefined,
 }
 
 export type {ItemModel};

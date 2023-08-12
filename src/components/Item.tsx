@@ -34,9 +34,9 @@ const Item = ({data, onChange, index}: Props) => {
     return (
         <div>
             <Stack direction="row" spacing={1} align="center">
-                {data.children.length > 0 && <Button width={4} padding={0}
-                                                     onClick={() => setIsOpen(!isOpen)}>
-                  <FcCollapse style={{transform: `rotate(${isOpen ? 0 : 180}deg)`}}/>
+                {data.children && data.children.length > 0 && <Button width={4} padding={0}
+                                                                      onClick={() => setIsOpen(!isOpen)}>
+                    <FcCollapse style={{transform: `rotate(${isOpen ? 0 : 180}deg)`}}/>
                 </Button>}
 
                 <ItemHead name={data.name} onChange={(newName: string) => {
@@ -44,6 +44,9 @@ const Item = ({data, onChange, index}: Props) => {
                 }}/>
 
                 <AddItem onChange={(itemName: string) => {
+                    if (!data.children) {
+                        data.children = [];
+                    }
                     data.children.push({name: itemName, children: []});
                     onChange(data, index);
                 }}/>
@@ -57,7 +60,7 @@ const Item = ({data, onChange, index}: Props) => {
 
             </Stack>
             {isOpen && <div style={{paddingLeft: "20px", margin: "5px"}}>
-                {data.children.length > 0 && data.children.map((child, index) =>
+                {data.children && data.children.length > 0 && data.children.map((child, index) =>
                     <Item key={index} data={child} index={index} onChange={changeHere}/>)}
             </div>
             }

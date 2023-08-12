@@ -1,26 +1,19 @@
 import {Button, Heading, HStack} from "@chakra-ui/react";
-import {initializeApp} from "firebase/app";
 import {getAuth, GoogleAuthProvider, signInWithPopup} from "firebase/auth";
 import {useAuthState} from "react-firebase-hooks/auth";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyB_foO-Xj7Y0dVOCDzbKOxBBjTPcCAm39E",
-    authDomain: "room-components.firebaseapp.com",
-    projectId: "room-components",
-    storageBucket: "room-components.appspot.com",
-    messagingSenderId: "891526826344",
-    appId: "1:891526826344:web:59a95dae372d2f2b2c6edd"
-};
+interface Props {
+    app: any
+}
 
-const NavBar = () => {
-    const app = initializeApp(firebaseConfig);
+const NavBar = ({app}: Props) => {
     const auth = getAuth(app);
     const [user] = useAuthState(auth);
     const googleProvider = new GoogleAuthProvider();
     const signInWithGoogle = async () => {
         try {
             await signInWithPopup(auth, googleProvider);
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
             alert(err.message);
         }
