@@ -16,6 +16,9 @@ const Item = ({data, onChange, index}: Props) => {
     const [isOpen, setIsOpen] = useState(true);
 
     const changeHere = (newData: ItemModel | undefined, index: number | undefined) => {
+        if (!data.children) {
+            data.children = [];
+        }
         if (index !== undefined && newData !== undefined) {
             data.children[index] = newData;
         }
