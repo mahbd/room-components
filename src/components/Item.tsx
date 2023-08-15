@@ -1,72 +1,63 @@
-import {useState} from "react";
 import {Button, Stack} from "@chakra-ui/react";
 import {FcCollapse} from "react-icons/fc";
 import ItemHead from "./ItemHead";
-import {ItemModel} from "../models";
 import AddItem from "./AddItem";
 import {AiFillDelete} from "react-icons/ai";
+import useItemStore, {ItemModel} from "../store/ItemStore";
 
 interface Props {
-    data: ItemModel,
-    onChange: (newData: ItemModel | undefined, index?: number) => void,
-    index?: number
+    itemId: number
 }
 
-const Item = ({data, onChange, index}: Props) => {
-    const [isOpen, setIsOpen] = useState(true);
-
-    const changeHere = (newData: ItemModel | undefined, index: number | undefined) => {
-        if (!data.children) {
-            data.children = [];
-        }
-        if (index !== undefined && newData !== undefined) {
-            data.children[index] = newData;
-        }
-        if (newData === undefined) {
-            if (index !== undefined) {
-                data.children.splice(index, 1);
-                onChange(data);
-            }
-        } else if (index !== undefined) {
-            onChange(data, index);
-        } else {
-            onChange(data);
-        }
-    }
+const Item = ({itemId}: Props) => {
+    const data = useItemStore(state => state.items[itemId]) as ItemModel;
+    const {addItem, updateItem, removeItem, openRecursive, closeItem, closeAll} = useItemStore(state => ({
+        removeItem: state.removeItem,
+        addItem: state.addItem,
+        updateItem: state.updateItem,
+        getItem: state.getItem,
+        openRecursive: state.openRecursive,
+        closeItem: state.closeItem,
+        closeAll: state.closeAll
+    }));
 
     return (
-        <div>
+        data && <div>
             <Stack direction="row" spacing={1} align="center">
-                {data.children && data.children.length > 0 && <Button width={4} padding={0}
-                                                                      onClick={() => setIsOpen(!isOpen)}>
-                    <FcCollapse style={{transform: `rotate(${isOpen ? 0 : 180}deg)`}}/>
-                </Button>}
+                <Button width={4} padding={0}
+                        onClick={() => {
+                            if (data.isOpened) {
+                                closeItem(data.id);
+                            } else {
+                                openRecursive(data.id);
+                            }
+                        }}>
+                    <FcCollapse style={{transform: `rotate(${data.isOpened ? 0 : 180}deg)`}}/>
+                </Button>
 
                 <ItemHead name={data.name} onChange={(newName: string) => {
-                    onChange({...data, name: newName}, index);
+                    const newItem = {...data, name: newName};
+                    updateItem(newItem);
                 }}/>
 
                 <AddItem onChange={(itemName: string) => {
-                    if (!data.children) {
-                        data.children = [];
-                    }
-                    data.children.push({name: itemName, children: []});
-                    onChange(data, index);
+                    const newItem = {name: itemName, id: data.id + 1, parent: data.id};
+                    addItem(newItem);
+                    closeAll();
+                    openRecursive(data.id);
                 }}/>
 
                 <Button padding={0}
                         onClick={() => {
-                            onChange(undefined, index);
+                            removeItem(data.id);
                         }}>
                     <AiFillDelete color={"red"}/>
                 </Button>
-
             </Stack>
-            {isOpen && <div style={{paddingLeft: "20px", margin: "5px"}}>
-                {data.children && data.children.length > 0 && data.children.map((child, index) =>
-                    <Item key={index} data={child} index={index} onChange={changeHere}/>)}
+            <div style={{paddingLeft: "20px", margin: "5px", display: data.isOpened ? "block" : "none"}}>
+                {data.children && data.children.length > 0 && data.children.map((child) =>
+                    <Item key={child} itemId={child}/>)}
             </div>
-            }
         </div>
     )
 }
