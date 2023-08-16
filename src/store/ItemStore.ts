@@ -20,6 +20,7 @@ interface Store {
     removeItem: (id: number, recursive?: boolean) => void,
     updateItem: (item: ItemModel) => void,
     getItem: (id: number) => ItemModel,
+    searchItems: (name: string) => ItemModel[],
     closeItem: (id: number) => void,
     closeAll: () => void,
     openItem: (id: number) => void,
@@ -100,12 +101,16 @@ const useItemStore = create<Store>((set) => ({
         return changed;
     }),
 
-    getItem: (id: number) => {
-        const item: any = useItemStore.getState().items[id];
-        if (item === undefined) {
-            throw new Error(`Item with id ${id} not found`);
-        }
-        return item;
+    getItem: (id: number) => useItemStore.getState().items[id],
+
+    searchItems: (name: string) => {
+        const items: ItemModel[] = [];
+        Object.values(useItemStore.getState().items).forEach((item) => {
+            if (item.name.toLowerCase().includes(name.toLowerCase())) {
+                items.push(item);
+            }
+        });
+        return items;
     },
 
     closeItem: (id: number) => set((state) => {

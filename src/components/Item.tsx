@@ -24,6 +24,7 @@ const Item = ({itemId}: Props) => {
     return (
         data && <div>
             <Stack direction="row" spacing={1} align="center">
+                {data.children && data.children.length > 0 &&
                 <Button width={4} padding={0}
                         onClick={() => {
                             if (data.isOpened) {
@@ -33,7 +34,7 @@ const Item = ({itemId}: Props) => {
                             }
                         }}>
                     <FcCollapse style={{transform: `rotate(${data.isOpened ? 0 : 180}deg)`}}/>
-                </Button>
+                </Button>}
 
                 <ItemHead name={data.name} onChange={(newName: string) => {
                     const newItem = {...data, name: newName};
