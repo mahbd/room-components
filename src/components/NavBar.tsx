@@ -2,12 +2,9 @@ import {Button, Heading, HStack} from "@chakra-ui/react";
 import {getAuth, GoogleAuthProvider, signInWithPopup} from "firebase/auth";
 import {useAuthState} from "react-firebase-hooks/auth";
 import SearchInput from "./SearchInput";
+import {app} from "../store/firebaseLocal";
 
-interface Props {
-    app: any
-}
-
-const NavBar = ({app}: Props) => {
+const NavBar = () => {
     const auth = getAuth(app);
     const [user] = useAuthState(auth);
     const googleProvider = new GoogleAuthProvider();

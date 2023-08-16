@@ -1,5 +1,8 @@
 import {create, Mutate, StoreApi, UseBoundStore} from "zustand";
 import {mountStoreDevtool} from 'simple-zustand-devtools';
+import {getAuth} from "firebase/auth";
+import {getDatabase, onValue, ref, set as fireSet} from "firebase/database";
+import {app} from "./firebaseLocal";
 
 export interface ItemModel {
     id: number,
@@ -9,11 +12,46 @@ export interface ItemModel {
     isOpened?: boolean,
 }
 
+const demoData = {
+    maxId: 5,
+    items: {
+        1: {
+            id: 1,
+            name: "Root",
+            parent: 0,
+            isOpened: true,
+            children: [2, 3]
+        },
+        2: {
+            id: 2,
+            name: "Table",
+            parent: 1,
+            isOpened: true,
+            children: [4]
+        },
+        3: {
+            id: 3,
+            name: "Rack",
+            parent: 1,
+            children: [5]
+        },
+        4: {
+            id: 4,
+            name: "Water Bottle",
+            parent: 2,
+        },
+        5: {
+            id: 5,
+            name: "Shoes",
+            parent: 3,
+        }
+    }
+}
+
 interface Store {
     maxId: number,
     items: { [key: number]: ItemModel },
-    loadLocalData: () => void,
-    loadFirebaseData: () => void,
+    loadFirebaseData: (data: any) => void,
     loadData: () => void,
     saveData: (data: {}) => void,
     addItem: (item: ItemModel) => void,
@@ -28,40 +66,59 @@ interface Store {
 }
 
 const useItemStore: UseBoundStore<Mutate<StoreApi<Store>, []>> = create<Store>((set) => ({
-    maxId: 1,
-    items: {
-        1: {
-            id: 1,
-            name: "Root",
-            parent: 0,
-        }
-    } as { [key: number]: ItemModel },
+    ...demoData,
 
-    loadLocalData: () => {
+    loadFirebaseData: (data) => set((state) => data),
 
-    },
-
-    loadFirebaseData: () => {
-
-    },
-
-    loadData: () => {
+    loadData: () => set(state => {
+        const database = getDatabase(app);
+        const user = getAuth(app).currentUser;
         let data: any = localStorage.getItem('data');
         if (data !== null) {
             data = JSON.parse(data);
             const synced = localStorage.getItem('synced');
-            if (synced === null || synced !== 'TRUE') {
-                set(() => ({...data}));
-                return;
+            if (synced === null || synced !== 'TRUE' || !navigator.onLine || !user) {
+                if (user && navigator.onLine) {
+                    fireSet(ref(database, `users/${user.uid}/data`), data);
+                    localStorage.setItem('synced', 'TRUE');
+                }
+
+                return data;
+            } else if (user) {
+                const dataRef = ref(database, `users/${user.uid}/data`);
+                onValue(dataRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data !== null) {
+                        useItemStore.getState().loadFirebaseData(data);
+                    }
+                });
             }
+        } else if (user) {
+            const dataRef = ref(database, `users/${user.uid}/data`);
+            onValue(dataRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data !== null) {
+                    useItemStore.getState().loadFirebaseData(data);
+                }
+            });
         }
-    },
+        return state;
+    }),
 
     saveData: (data) => {
         const json = JSON.stringify(data);
         localStorage.setItem('data', json);
+        if (navigator.onLine) {
+            const user = getAuth(app).currentUser;
+            if (user) {
+                const userRef = ref(getDatabase(app), `users/${user.uid}/data`);
+                fireSet(userRef, data);
+                localStorage.setItem('synced', 'TRUE');
+            }
+        } else {
+            localStorage.setItem('synced', 'FALSE');
+        }
     },
-
 
     addItem: (item: ItemModel) => set((state) => {
         const changed = {
@@ -90,12 +147,12 @@ const useItemStore: UseBoundStore<Mutate<StoreApi<Store>, []>> = create<Store>((
         // @ts-ignore
         parent.children = parent.children?.filter((child) => child !== id);
         delete state.items[id];
-        useItemStore.getState().saveData(state);
-        return {items: state.items};
+        useItemStore.getState().saveData({items: state.items, maxId: state.maxId});
+        return {items: state.items, maxId: state.maxId};
     }),
 
     updateItem: (item: ItemModel) => set((state) => {
-        const changed = {items: {...state.items, [item.id]: item}};
+        const changed = {items: {...state.items, [item.id]: item}, maxId: state.maxId};
         useItemStore.getState().saveData(changed);
         return changed;
     }),

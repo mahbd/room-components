@@ -1,30 +1,22 @@
 import Item from "./components/Item";
 import NavBar from "./components/NavBar";
 import {useEffect} from "react";
-import useItemStore from "./store/ItemStore";
-import {initializeApp} from "firebase/app";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyCO0uh8b343HpOCZFidlQVbXaRkvkrUzhU",
-    authDomain: "room-components-c66b8.firebaseapp.com",
-    databaseURL: "https://room-components-c66b8-default-rtdb.firebaseio.com",
-    projectId: "room-components-c66b8",
-    storageBucket: "room-components-c66b8.appspot.com",
-    messagingSenderId: "890750296374",
-    appId: "1:890750296374:web:2919ef09f1111dbc8b5397"
-};
+import useItemStore, {ItemModel} from "./store/ItemStore";
+import {useAuthState} from "react-firebase-hooks/auth";
+import {app} from "./store/firebaseLocal";
+import {getAuth} from "firebase/auth";
 
 function App() {
+    const data = useItemStore(state => state?.items[1]) as ItemModel;
+    const [user] = useAuthState(getAuth(app));
     useEffect(() => {
         document.title = "Todo App";
         useItemStore.getState().loadData();
-    }, []);
-
-    const app = initializeApp(firebaseConfig);
+    }, [user]);
 
     return (
-        <div>
-            <NavBar app={app}/>
+        data && <div>
+            <NavBar/>
             <Item key={1} itemId={1}/>
         </div>
     )
