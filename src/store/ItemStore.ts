@@ -12,6 +12,10 @@ export interface ItemModel {
 interface Store {
     maxId: number,
     items: { [key: number]: ItemModel },
+    loadLocalData: () => void,
+    loadFirebaseData: () => void,
+    loadData: () => void,
+    saveData: (data: {}) => void,
     addItem: (item: ItemModel) => void,
     removeItem: (id: number, recursive?: boolean) => void,
     updateItem: (item: ItemModel) => void,
@@ -32,16 +36,47 @@ const useItemStore = create<Store>((set) => ({
         }
     } as { [key: number]: ItemModel },
 
-    addItem: (item: ItemModel) => set((state) => ({
-        items: {
-            ...state.items,
-            [state.maxId + 1]: {...item, id: state.maxId + 1},
-            [item.parent]: {
-                ...state.items[item.parent],
-                children: [...(state.items[item.parent].children ?? []), state.maxId + 1]
+    loadLocalData: () => {
+
+    },
+
+    loadFirebaseData: () => {
+
+    },
+
+    loadData: () => {
+        let data = localStorage.getItem('data');
+        if (data !== null) {
+            data = JSON.parse(data);
+            const synced = localStorage.getItem('synced');
+            if (synced === null || synced !== 'TRUE') {
+                set(() => data);
+                return;
             }
-        }, maxId: state.maxId + 1
-    })),
+        }
+        set(() => data);
+    },
+
+    saveData: (data) => {
+        const json = JSON.stringify(data);
+        localStorage.setItem('data', json);
+    },
+
+
+    addItem: (item: ItemModel) => set((state) => {
+        const changed = {
+            items: {
+                ...state.items,
+                [state.maxId + 1]: {...item, id: state.maxId + 1},
+                [item.parent]: {
+                    ...state.items[item.parent],
+                    children: [...(state.items[item.parent].children ?? []), state.maxId + 1]
+                }
+            }, maxId: state.maxId + 1
+        };
+        useItemStore.getState().saveData(changed);
+        return changed;
+    }),
 
     removeItem: (id: number) => set((state) => {
         if (id === 1) {
@@ -55,9 +90,15 @@ const useItemStore = create<Store>((set) => ({
         // @ts-ignore
         parent.children = parent.children?.filter((child) => child !== id);
         delete state.items[id];
+        useItemStore.getState().saveData(state);
         return {items: state.items};
     }),
-    updateItem: (item: ItemModel) => set((state) => ({items: {...state.items, [item.id]: item}})),
+
+    updateItem: (item: ItemModel) => set((state) => {
+        const changed = {items: {...state.items, [item.id]: item}};
+        useItemStore.getState().saveData(changed);
+        return changed;
+    }),
 
     getItem: (id: number) => {
         const item: any = useItemStore.getState().items[id];
