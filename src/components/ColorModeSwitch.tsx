@@ -3,7 +3,7 @@ import {AiOutlineDown} from "react-icons/ai";
 import {useEffect, useState} from "react";
 
 const ColorModeSwitch = () => {
-    const mqListener = (e => {
+    const mqListener = ((e: any) => {
         const themePreference = localStorage.getItem("themePreference");
         if (themePreference === "system" || themePreference === null) {
             if (e.matches) {
