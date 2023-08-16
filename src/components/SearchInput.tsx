@@ -30,7 +30,7 @@ const SearchInput = () => {
         setItems(searchItems(value));
     }
 
-    const getFullName = (id: number) => {
+    const getFullName = (id: number): string => {
         const item = getItem(id);
         if (item) {
             const parent = getItem(item.parent);

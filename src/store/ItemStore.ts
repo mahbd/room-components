@@ -1,4 +1,4 @@
-import {create} from "zustand";
+import {create, Mutate, StoreApi, UseBoundStore} from "zustand";
 import {mountStoreDevtool} from 'simple-zustand-devtools';
 
 export interface ItemModel {
@@ -27,7 +27,7 @@ interface Store {
     openRecursive: (id: number) => void,
 }
 
-const useItemStore = create<Store>((set) => ({
+const useItemStore: UseBoundStore<Mutate<StoreApi<Store>, []>> = create<Store>((set) => ({
     maxId: 1,
     items: {
         1: {
@@ -46,16 +46,15 @@ const useItemStore = create<Store>((set) => ({
     },
 
     loadData: () => {
-        let data = localStorage.getItem('data');
+        let data: any = localStorage.getItem('data');
         if (data !== null) {
             data = JSON.parse(data);
             const synced = localStorage.getItem('synced');
             if (synced === null || synced !== 'TRUE') {
-                set(() => data);
+                set(() => ({...data}));
                 return;
             }
         }
-        set(() => data);
     },
 
     saveData: (data) => {
@@ -105,7 +104,7 @@ const useItemStore = create<Store>((set) => ({
 
     searchItems: (name: string) => {
         const items: ItemModel[] = [];
-        Object.values(useItemStore.getState().items).forEach((item) => {
+        (Object.values(useItemStore.getState().items) as ItemModel[]).forEach((item) => {
             if (item.name.toLowerCase().includes(name.toLowerCase())) {
                 items.push(item);
             }
@@ -152,6 +151,9 @@ const useItemStore = create<Store>((set) => ({
     }),
 }));
 
-mountStoreDevtool('ItemStore', useItemStore);
+if (process.env.NODE_ENV === 'development') {
+    mountStoreDevtool('ItemStore', useItemStore);
+}
+
 
 export default useItemStore;
