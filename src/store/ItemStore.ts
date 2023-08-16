@@ -17,7 +17,7 @@ const demoData = {
     items: {
         1: {
             id: 1,
-            name: "Root",
+            name: "Room",
             parent: 0,
             isOpened: true,
             children: [2, 3]
