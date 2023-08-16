@@ -68,7 +68,7 @@ interface Store {
 const useItemStore: UseBoundStore<Mutate<StoreApi<Store>, []>> = create<Store>((set) => ({
     ...demoData,
 
-    loadFirebaseData: (data) => set((state) => data),
+    loadFirebaseData: (data) => set(() => data),
 
     loadData: () => set(state => {
         const database = getDatabase(app);
