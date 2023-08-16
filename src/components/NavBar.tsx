@@ -3,6 +3,7 @@ import {getAuth, GoogleAuthProvider, signInWithPopup} from "firebase/auth";
 import {useAuthState} from "react-firebase-hooks/auth";
 import SearchInput from "./SearchInput";
 import {app} from "../store/firebaseLocal";
+import ColorModeSwitch from "./ColorModeSwitch";
 
 const NavBar = () => {
     const auth = getAuth(app);
@@ -26,6 +27,7 @@ const NavBar = () => {
             <HStack justifyContent={'space-between'}>
                 <Heading as={'h1'} size={'lg'}>Components</Heading>
                 <HStack>
+                    <ColorModeSwitch/>
                     <SearchInput/>
                     {user && <Button marginRight={2} onClick={logout}>Logout</Button>}
                     {!user && <Button marginRight={2} onClick={signInWithGoogle}>
